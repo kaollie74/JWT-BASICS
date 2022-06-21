@@ -1,26 +1,31 @@
-// 1. check username & password in login request
-//      a. if valid/exist create token send to client
-//      b. if not send error to client
-
-// 2. setup auth so only JWT can access the dashboard
-
+const jwt = require("jsonwebtoken");
 const CustomAPIError = require("../errors/custom-error");
+
 const login = async (req, res) => {
     const { username, password } = req.body;
-    console.log({ username, password });
-
     if (username && password) {
-        return res.status(200).send("Fake Login/Register/Signup Route");
+        // just for demo, normally provided by DB
+        const id = new Date().getDate();
+
+        const token = jwt.sign({ id, username }, process.env.JWT_SECRET, {
+            expiresIn: "30d",
+        });
+        return res.status(200).send({ msg: "user created", token });
     }
+
     throw new CustomAPIError("Please provide username & password", 400);
 };
 
 const dashBoard = async (req, res) => {
+    const {user} = req;
     const luckyNumber = Math.floor(Math.random() * 100);
     res.status(200).json({
-        msg: `Hello, John Doe`,
+        msg: `Hello, ${user.username}`,
         secret: `Here is your authorized data, your lucky number is ${luckyNumber}`,
     });
+
+
+    
 };
 
 module.exports = {
